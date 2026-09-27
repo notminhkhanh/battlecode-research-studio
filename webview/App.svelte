@@ -65,7 +65,7 @@
   function removeSelected() {
     if (!research || !selectedId) return;
     research.annotations = research.annotations.filter((item) => item.id !== selectedId);
-    selectedId = undefined;
+    clearAnnotationSelection();
     touch();
   }
 
@@ -85,6 +85,12 @@
   function focusDragons(ids: number[] = selected?.dragonIds ?? []) {
     if (!runner) return;
     runner.selectedDragonIds = [...new Set(ids)];
+  }
+
+  function clearAnnotationSelection() {
+    selectedId = undefined;
+    mapPick = false;
+    focusDragons([]);
   }
 
   function selectAnnotation(annotation: ResearchAnnotation, seek = true) {
@@ -158,9 +164,7 @@
         notice = "Warning: this sidecar was created for different replay bytes. Review it before saving.";
       }
       candidates = detectSequenceCandidates(loaded);
-      const first = research.annotations[0];
-      if (first) selectAnnotation(first);
-      else focusDragons([]);
+      clearAnnotationSelection();
       errorMessage = undefined;
     } catch (error) {
       errorMessage = error instanceof Error ? error.message : String(error);
@@ -199,9 +203,7 @@
         try {
           const incoming = parseResearchDocument(message.researchText);
           research = incoming;
-          const first = incoming.annotations[0];
-          if (first) selectAnnotation(first);
-          else focusDragons([]);
+          clearAnnotationSelection();
           bookmarkPath = message.path;
           mapPick = false;
           notice = incoming.replay.sha256 === replayHash
@@ -264,8 +266,9 @@
         {/each}
       </div>
 
-      {#if selected}
-        <form class="editor" onsubmit={(event) => event.preventDefault()}>
+      <section class="annotation-detail" aria-label="Annotation details">
+        {#if selected}
+          <form class="editor" onsubmit={(event) => event.preventDefault()}>
           <div class="editor-head"><span>Edit annotation</span><button class="danger" onclick={removeSelected}>Delete</button></div>
           <label>Title<input bind:value={selected.title} oninput={() => touch(selected)} /></label>
           <div class="two">
@@ -288,8 +291,9 @@
           {#if selected.steps?.length}
             <details><summary>Sequence evidence <span>{selected.steps.length} steps</span></summary>{#each selected.steps as step}<button class="step" onclick={() => { focusDragons(step.dragonIds ?? []); jump(step.anchor.round); }}>r{step.anchor.round}: {step.label}</button>{/each}</details>
           {/if}
-        </form>
-      {/if}
+          </form>
+        {/if}
+      </section>
     </div>
   {/snippet}
 
@@ -336,11 +340,12 @@
   .candidate-list { max-height: 160px; overflow: auto; }
   .candidate-list button, .annotation-list button { display: flex; flex-direction: column; align-items: stretch; width: 100%; text-align: left; border-width: 1px 0 0; border-radius: 0; background: transparent; }
   .candidate-list span, .annotation-list span { color: var(--vis-ink-3); font: var(--vis-text-label) var(--vis-font-mono); overflow: hidden; text-overflow: ellipsis; }
-  .annotation-list { margin-bottom: 10px; border: 1px solid var(--vis-rule); border-radius: var(--vis-radius-box); overflow: hidden; }
+  .annotation-list { height: 15rem; flex: 0 0 15rem; margin-bottom: 10px; border: 1px solid var(--vis-rule); border-radius: var(--vis-radius-box); overflow-x: hidden; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--vis-rule) transparent; }
   .annotation-list button:first-child { border-top: 0; }
   .annotation-list button.on { color: var(--vis-ink); border-left: 2px solid var(--vis-primary); background: var(--vis-press); }
   .kind { text-transform: uppercase; letter-spacing: .08em; }
-  .editor { display: flex; flex-direction: column; gap: 8px; padding-top: 10px; border-top: 1px solid var(--vis-rule); }
+  .annotation-detail { min-height: 8rem; padding-top: 10px; border-top: 1px solid var(--vis-rule); }
+  .editor { display: flex; flex-direction: column; gap: 8px; }
   .editor-head { display: flex; justify-content: space-between; align-items: center; color: var(--vis-ink); font-size: calc(var(--vis-text-body) * var(--font-scale, 1)); font-weight: 600; }
   label { display: flex; flex-direction: column; gap: 3px; color: var(--vis-ink-3); font-size: var(--vis-text-label); }
   input, textarea, select { width: 100%; color: var(--vis-ink); border: 1px solid var(--vis-rule); border-radius: var(--vis-radius-field); background: var(--vis-field); padding: .35rem .45rem; font-size: calc(var(--vis-text-meta) * var(--font-scale, 1)); line-height: 1.35; resize: vertical; }
