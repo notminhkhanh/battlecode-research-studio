@@ -47,7 +47,7 @@ Represent meaningful chains as `sequence` annotations with ordered `steps`, not 
 
 ### 4. Add spatial context
 
-Highlight sender/receiver dragons and map cells or rectangles involved in the hypothesis. Check portals, pearl beds, congestion, enemies, and boundaries. A response that looks communicative in time may instead be forced by local geometry.
+Reference the sender and receiver dragon IDs in the annotation. Check portals, pearl beds, congestion, enemies, and boundaries. A response that looks communicative in time may instead be forced by local geometry.
 
 ### 5. Search beyond sonar
 

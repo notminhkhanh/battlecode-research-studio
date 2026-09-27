@@ -29,7 +29,7 @@ Now compare candidate `sonar-27-34-b68400334d08d04c`:
 - the same sender/receiver pair uses another exact payload in rounds 59, 63, and 79;
 - #34 next chooses `MOVE S` each time.
 
-The contrast makes a direction-like field more interesting, but it still needs controls. Inspect how the two 64-bit values differ, whether #34 moves west/south without these messages, and what map targets are visible in those rounds. Add cell highlights around likely targets and record your result as a separate annotation rather than overwriting detector evidence.
+The contrast makes a direction-like field more interesting, but it still needs controls. Inspect how the two 64-bit values differ, whether #34 moves west/south without these messages, and what map targets are visible in those rounds. Record the relevant spatial context as a separate annotation rather than overwriting detector evidence.
 
 ## 4. Turn the finding into research
 

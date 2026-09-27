@@ -1,6 +1,6 @@
 # Battlecode Research Studio
 
-Battlecode Research Studio is an additive extension of the organiser's VS Code replay viewer for collaborative strategy research. It keeps the original board, playback controls, hover metadata, pinned dragon cards, following, vision, Game Log filters, Info and Options, then adds one Research tab for shareable bookmarks, time ranges, hypotheses, map regions, and communication/action sequences.
+Battlecode Research Studio is an additive extension of the organiser's VS Code replay viewer for collaborative strategy research. It keeps the original board, playback controls, hover metadata, pinned dragon cards, following, vision, Game Log filters, Info and Options, then adds one Research tab for shareable bookmarks, time ranges, hypotheses, and communication/action sequences.
 
 The repository is private so the included `M228828.replay` and your team's analysis stay within the team.
 

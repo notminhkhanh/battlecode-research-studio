@@ -10,13 +10,11 @@
     newAnnotation,
     newResearchDocument,
     parseResearchDocument,
-    type MapHighlight,
     type ResearchAnnotation,
     type ResearchDocument,
   } from "../src/research";
   import { detectSequenceCandidates, sequenceCandidateToAnnotation, type SequenceCandidate } from "../src/sequences";
   import { REPLAY_FORMAT_VERSION } from "../vendor/unswbc/packages/visualiser/src/replay/generated/replay";
-  import type { BoardProjection } from "../vendor/unswbc/packages/visualiser/src/visualiser/BoardView.svelte";
 
   const api = acquireVsCodeApi();
   let loaded: LoadedReplay | undefined = $state();
@@ -29,7 +27,6 @@
   let replayHash = $state("");
   let errorMessage: string | undefined = $state();
   let notice = $state("");
-  let mapPick = $state(false);
 
   const selected = $derived(research?.annotations.find((item) => item.id === selectedId));
 
@@ -89,7 +86,6 @@
 
   function clearAnnotationSelection() {
     selectedId = undefined;
-    mapPick = false;
     focusDragons([]);
   }
 
@@ -105,38 +101,6 @@
     touch(selected);
   }
 
-  function toggleCell(x: number, y: number) {
-    if (!selected) return;
-    selected.highlights ??= [];
-    const at = selected.highlights.findIndex((h) => h.kind === "cell" && h.x === x && h.y === y);
-    if (at >= 0) selected.highlights.splice(at, 1);
-    else selected.highlights.push({ kind: "cell", x, y, label: "Focus" });
-    touch(selected);
-  }
-
-  function boardClick(event: MouseEvent, projection: { unproject: (x: number, y: number) => { x: number; y: number } }) {
-    if (!mapPick) return;
-    const element = event.currentTarget as HTMLElement;
-    const box = element.getBoundingClientRect();
-    const point = projection.unproject(event.clientX - box.left, event.clientY - box.top);
-    const x = Math.floor(point.x);
-    const y = Math.floor(point.y);
-    const board = loaded?.match.roundAt(0).map;
-    if (board && x >= 0 && y >= 0 && x < board.width && y < board.height) toggleCell(x, y);
-  }
-
-  function highlightRects(annotation: ResearchAnnotation | undefined): Array<MapHighlight & { x: number; y: number; width: number; height: number }> {
-    if (!annotation || !loaded || !runner) return [];
-    const out: Array<MapHighlight & { x: number; y: number; width: number; height: number }> = [];
-    for (const highlight of annotation.highlights ?? []) {
-      if (highlight.kind === "cell") out.push({ ...highlight, width: 1, height: 1 });
-      if (highlight.kind === "rect") out.push(highlight);
-      // Dragon references use the original viewer's selected-dragon treatment:
-      // pinned metadata, vision and Game Log filters. Do not paint a competing outline.
-    }
-    return out;
-  }
-
   async function sha256(bytes: Uint8Array): Promise<string> {
     const copy = Uint8Array.from(bytes).buffer;
     const digest = await crypto.subtle.digest("SHA-256", copy);
@@ -146,7 +110,6 @@
   async function open(bytes: Uint8Array, name: string, researchText?: string, researchPath?: string) {
     try {
       notice = "";
-      mapPick = false;
       loaded = buildReplay(bytes);
       runner = new GameRunner(loaded.match);
       fileName = name;
@@ -205,7 +168,6 @@
           research = incoming;
           clearAnnotationSelection();
           bookmarkPath = message.path;
-          mapPick = false;
           notice = incoming.replay.sha256 === replayHash
             ? `Opened bookmark file ${message.path}`
             : `Opened ${message.path}; verify that it belongs to this replay.`;
@@ -286,8 +248,6 @@
           <label>Observed evidence<textarea rows="4" bind:value={selected.observation} oninput={() => touch(selected)} placeholder="What is directly visible in the replay?"></textarea></label>
           <label>Hypothesis<textarea rows="3" bind:value={selected.hypothesis} oninput={() => touch(selected)} placeholder="What strategy might explain it?"></textarea></label>
           <label>Alternatives<textarea rows="3" value={(selected.alternatives ?? []).join("\n")} oninput={(event) => { selected.alternatives = event.currentTarget.value.split("\n").filter(Boolean); touch(selected); }} placeholder="One competing explanation per line"></textarea></label>
-          <label>Tags<input value={selected.tags.join(", ")} oninput={(event) => { selected.tags = event.currentTarget.value.split(",").map((value) => value.trim()).filter(Boolean); touch(selected); }} /></label>
-          <button class:on={mapPick} onclick={() => (mapPick = !mapPick)}>{mapPick ? "Click cells on board (done)" : "Highlight map cells"}</button>
           {#if selected.steps?.length}
             <details><summary>Sequence evidence <span>{selected.steps.length} steps</span></summary>{#each selected.steps as step}<button class="step" onclick={() => { focusDragons(step.dragonIds ?? []); jump(step.anchor.round); }}>r{step.anchor.round}: {step.label}</button>{/each}</details>
           {/if}
@@ -297,26 +257,9 @@
     </div>
   {/snippet}
 
-  {#snippet boardOverlay(projection: BoardProjection)}
-    <div
-      class="research-overlay"
-      class:picking={mapPick}
-      role="button"
-      tabindex={mapPick ? 0 : -1}
-      aria-label="Select highlighted map cells"
-      onclick={(event) => boardClick(event, projection)}
-      onkeydown={(event) => { if (event.key === "Escape") mapPick = false; }}
-    >
-      {#each highlightRects(selected) as highlight, index (`${highlight.kind}-${highlight.x}-${highlight.y}-${index}`)}
-        {@const at = projection.project(highlight.x, highlight.y)}
-        <div class="map-highlight" style:left="{at.x}px" style:top="{at.y}px" style:width="{highlight.width * projection.scale}px" style:height="{highlight.height * projection.scale}px" style:border-color={highlight.color ?? "var(--vis-warning)"} title={highlight.label}></div>
-      {/each}
-    </div>
-  {/snippet}
-
   <!-- Match the original UNSWBC VS Code host; Research is only an extra inspector tab. -->
   <div class="frame">
-    <ReplayInspector {loaded} {runner} file={fileName} {researchPanel} {boardOverlay} />
+    <ReplayInspector {loaded} {runner} file={fileName} {researchPanel} />
   </div>
 {:else}
   <div class="message">Opening replay and research sidecar…</div>
@@ -354,9 +297,6 @@
   .round-row { display: flex; gap: 5px; }
   .dragon-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
   .step { display: block; width: 100%; border-width: 1px 0 0; border-radius: 0; text-align: left; font-size: 11px; background: transparent; }
-  .research-overlay { position: absolute; inset: 0; pointer-events: none; }
-  .research-overlay.picking { pointer-events: auto; cursor: crosshair; }
-  .map-highlight { position: absolute; border: 2px solid var(--vis-warning); background: color-mix(in srgb, var(--vis-warning) 20%, transparent); pointer-events: none; }
   .message { margin: 30px; display: flex; flex-direction: column; gap: 8px; }
   .message.error { color: var(--vis-error); }
 </style>
