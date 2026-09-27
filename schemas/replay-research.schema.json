@@ -35,6 +35,19 @@
         "rounds": { "type": "integer", "minimum": 0 }
       }
     },
+    "step": {
+      "type": "object",
+      "required": ["anchor", "label"],
+      "additionalProperties": false,
+      "properties": {
+        "anchor": { "$ref": "#/$defs/anchor" },
+        "label": { "type": "string", "minLength": 1 },
+        "eventType": { "type": "string" },
+        "team": { "enum": ["A", "B"] },
+        "dragonIds": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "uniqueItems": true },
+        "payload": { "type": "string" }
+      }
+    },
     "highlight": {
       "oneOf": [
         {
@@ -81,7 +94,7 @@
         "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
         "teams": { "type": "array", "items": { "enum": ["A", "B"] }, "uniqueItems": true },
         "dragonIds": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "uniqueItems": true },
-        "steps": { "type": "array", "items": { "type": "object" } },
+        "steps": { "type": "array", "items": { "$ref": "#/$defs/step" } },
         "highlights": { "type": "array", "items": { "$ref": "#/$defs/highlight" } },
         "evidence": { "type": "array", "items": { "type": "object" } },
         "provenance": {
@@ -99,7 +112,7 @@
       },
       "allOf": [
         { "if": { "properties": { "kind": { "not": { "const": "general" } } } }, "then": { "required": ["start"] } },
-        { "if": { "properties": { "kind": { "const": "range" } } }, "then": { "required": ["end"] } }
+        { "if": { "properties": { "kind": { "enum": ["range", "sequence"] } } }, "then": { "required": ["end"] } }
       ]
     }
   }

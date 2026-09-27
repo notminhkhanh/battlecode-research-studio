@@ -8,6 +8,7 @@ The repository is private so the included `M228828.replay` and your team's analy
 
 - Open `*.replay` files directly in VS Code with the official UNSW Battlecode renderer.
 - Add general notes, point bookmarks, and round ranges.
+- Browse bookmarks in a fixed scrollable list; the detail area remains empty until one is selected.
 - View annotations read-only by default; edit them through an explicit draft and **Save annotation** action.
 - Selecting a range or sequence seeks to its saved start and pauses playback when its saved end is reached.
 - Reference dragons in an annotation using the viewer's native selection system. Selecting the bookmark opens the original pinned cards, vision, and Game Log filters.

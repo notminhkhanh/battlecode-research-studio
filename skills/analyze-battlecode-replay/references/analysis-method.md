@@ -11,5 +11,6 @@ Key facts:
 - Child dragon IDs begin at `dragonSplit`; track team membership from initial bodies and split events.
 - Public/sanitised battle replays can omit opponent logs, indicators, debug drawings, bot name, and instruction counts. Absence of those fields is not evidence that the bot lacked the state.
 - A high-quality claim cites rounds/events, measures repetition, checks no-message or alternate-message controls, proposes alternatives, and explains what evidence would falsify it.
+- `start` and `end` are persistent evidence bounds, not the viewer's current position. Selecting a timed annotation seeks to `start`; ranges and sequences auto-pause at `end`. Use the first and last relevant evidence and keep `end >= start`.
 
 Default detector rule: allied delivery, same sender/receiver/exact payload, at least three distinct receiver actions, receiver action within the same or next round, and at least 75% matching response family. Duplicate pings tied to one response count once. Generated confidence is a ranking heuristic and must be reviewed.

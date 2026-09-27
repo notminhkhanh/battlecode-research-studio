@@ -13,7 +13,7 @@ The replay is on the 32×16 map **Devil**, has 171 round-start events, 6,249 act
 
 ## 2. Open the replay
 
-Open `M228828.replay` in VS Code. The adjacent sidecar loads two detector candidates in the additional **Research** tab. Selecting one seeks to its start and selects dragons #27 and #34 through the original viewer, so their pinned cards, vision, and Game Log filters are available. Use its **Sequence evidence** steps to jump between messages and responses.
+Open `M228828.replay` in VS Code. The adjacent sidecar loads two detector candidates into the fixed, scrollable list in the additional **Research** tab; the detail area initially stays empty. Selecting one opens its read-only details, seeks to its saved start, and selects dragons #27 and #34 through the original viewer, so their pinned cards, vision, and Game Log filters are available. Press Play to review the interval—the viewer pauses at the saved end. Use its **Sequence evidence** steps to jump between messages and responses.
 
 ## 3. Review one candidate
 
@@ -41,4 +41,4 @@ Suggested human follow-up:
 4. Check whether the changing bits align with coordinates, directions, roles, or timestamps.
 5. Promote the hypothesis only if it predicts held-out occurrences.
 
-Save the sidecar, commit only your review changes, and ask a teammate to independently verify the cited rounds.
+Choose **Edit** before changing a candidate, then **Save annotation** to commit the draft and write the sidecar. Commit only your review changes and ask a teammate to independently verify the cited rounds.

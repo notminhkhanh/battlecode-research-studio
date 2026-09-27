@@ -45,6 +45,10 @@ Start with exact repeated `(sender, receiver, payload)` groups. Count a receiver
 
 Represent meaningful chains as `sequence` annotations with ordered `steps`, not just a wide time range. Cite event indices and rounds in `evidence`.
 
+Treat `start` and `end` as stable evidence bounds. Set `start` to the first relevant event and `end` to the last relevant event, with `end >= start`. The Research UI seeks to `start` when the annotation is selected and pauses playback at `end`; do not rewrite either anchor from incidental viewer playback state.
+
+Populate `dragonIds` with the unique focal dragons derived from actual replay actors—not every nearby dragon. For sonar, use the recorded sender and the actual dragon hit; for a response step, use the actor whose response is cited. Sequence-step `dragonIds` should contain only that step's actors, while annotation-level `dragonIds` is the focal union used by the viewer's native pinned cards, vision, follow, and Game Log filters. See the skill's `references/annotation-contract.md` for the complete derivation rules.
+
 ### 4. Add spatial context
 
 Reference the sender and receiver dragon IDs in the annotation. Check portals, pearl beds, congestion, enemies, and boundaries. A response that looks communicative in time may instead be forced by local geometry.
@@ -68,8 +72,8 @@ Mark weak-but-worthwhile findings `needs-evidence`. Keep rejected hypotheses whe
 
 - A neutral title.
 - Exact observation with counts and consistency.
-- Start/end and ordered evidence steps.
-- Sender/receiver dragon IDs and team.
+- Stable start/end bounds and ordered evidence steps.
+- Sender/actual-receiver dragon IDs at annotation and step level, plus tracked team.
 - Payload in decimal (lossless JSON string) and hexadecimal (in labels/observation).
 - One hypothesis and at least two alternatives.
 - Confidence and review status.

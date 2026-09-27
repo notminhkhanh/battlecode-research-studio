@@ -27,6 +27,30 @@ describe("research document", () => {
     expect(validateResearchDocument(document)).toContain("annotations[0].start is required for timed annotations.");
   });
 
+  it("requires sequences to have a saved end bound", () => {
+    const document = newResearchDocument(replay, "2026-09-27T00:00:00.000Z");
+    const annotation = newAnnotation("sequence", "tester", { round: 3 }, "2026-09-27T00:00:00.000Z");
+    delete annotation.end;
+    document.annotations.push(annotation);
+    expect(validateResearchDocument(document)).toContain(
+      "annotations[0].end is required for range and sequence annotations.",
+    );
+  });
+
+  it("validates range order and interested dragon IDs", () => {
+    const document = newResearchDocument(replay, "2026-09-27T00:00:00.000Z");
+    const annotation = newAnnotation("range", "tester", { round: 8 }, "2026-09-27T00:00:00.000Z");
+    annotation.end = { round: 4 };
+    annotation.dragonIds = [7, 7];
+    document.annotations.push(annotation);
+    expect(validateResearchDocument(document)).toEqual(
+      expect.arrayContaining([
+        "annotations[0].end.round must be greater than or equal to start.round.",
+        "annotations[0].dragonIds must be unique non-negative integers.",
+      ]),
+    );
+  });
+
   it("merges independently created annotations and keeps the latest edit", () => {
     const base = newResearchDocument(replay, "2026-09-27T00:00:00.000Z");
     const first = newAnnotation("general", "one", undefined, "2026-09-27T00:00:00.000Z");

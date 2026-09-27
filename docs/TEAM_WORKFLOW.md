@@ -4,7 +4,7 @@
 
 1. One teammate adds a replay to a private/shared location and runs the detector.
 2. Commit the replay only when you have the right to share it within this repository. Always commit the much smaller `.research.json` sidecar.
-3. Each reviewer opens the same replay bytes, checks candidate evidence in the visualiser, and adds or edits annotations.
+3. Each reviewer opens the same replay bytes, selects candidates from the fixed Research list, and reviews the saved start-to-end interval. Annotation details are read-only until the reviewer chooses **Edit**; **Save annotation** commits the draft and writes the sidecar, while **Cancel** preserves the previous values.
 4. Review important claims together. Promote them from `candidate` to `confirmed`, mark missing tests as `needs-evidence`, or retain failed ideas as `rejected`.
 5. Turn confirmed patterns into a concrete experiment against your own bot.
 

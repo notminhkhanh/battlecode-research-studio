@@ -106,7 +106,7 @@ export function newAnnotation(
     kind,
     title: kind === "general" ? "Replay note" : kind === "sequence" ? "Interesting sequence" : "Bookmark",
     ...(anchor && kind !== "general" ? { start: anchor } : {}),
-    ...(anchor && kind === "range" ? { end: anchor } : {}),
+    ...(anchor && (kind === "range" || kind === "sequence") ? { end: anchor } : {}),
     observation: "",
     status: "candidate",
     tags: [],
@@ -178,7 +178,42 @@ export function validateResearchDocument(value: unknown): string[] {
       if (raw.confidence !== undefined && (typeof raw.confidence !== "number" || raw.confidence < 0 || raw.confidence > 1))
         errors.push(`${at}.confidence must be between 0 and 1.`);
       if (raw.kind !== "general" && !isObject(raw.start)) errors.push(`${at}.start is required for timed annotations.`);
-      if (raw.kind === "range" && !isObject(raw.end)) errors.push(`${at}.end is required for ranges.`);
+      if ((raw.kind === "range" || raw.kind === "sequence") && !isObject(raw.end))
+        errors.push(`${at}.end is required for range and sequence annotations.`);
+      const startRound = isObject(raw.start) ? raw.start.round : undefined;
+      const endRound = isObject(raw.end) ? raw.end.round : undefined;
+      if (startRound !== undefined && (!Number.isInteger(startRound) || Number(startRound) < 0))
+        errors.push(`${at}.start.round must be a non-negative integer.`);
+      if (endRound !== undefined && (!Number.isInteger(endRound) || Number(endRound) < 0))
+        errors.push(`${at}.end.round must be a non-negative integer.`);
+      if (Number.isInteger(startRound) && Number.isInteger(endRound) && Number(endRound) < Number(startRound))
+        errors.push(`${at}.end.round must be greater than or equal to start.round.`);
+      if (raw.dragonIds !== undefined) {
+        if (
+          !Array.isArray(raw.dragonIds) ||
+          raw.dragonIds.some((id) => !Number.isInteger(id) || Number(id) < 0) ||
+          new Set(raw.dragonIds).size !== raw.dragonIds.length
+        ) errors.push(`${at}.dragonIds must be unique non-negative integers.`);
+      }
+      if (raw.steps !== undefined) {
+        if (!Array.isArray(raw.steps)) errors.push(`${at}.steps must be an array.`);
+        else raw.steps.forEach((step, stepIndex) => {
+          const stepAt = `${at}.steps[${stepIndex}]`;
+          if (!isObject(step)) {
+            errors.push(`${stepAt} must be an object.`);
+            return;
+          }
+          if (!isObject(step.anchor) || !Number.isInteger(step.anchor.round) || Number(step.anchor.round) < 0)
+            errors.push(`${stepAt}.anchor.round must be a non-negative integer.`);
+          if (typeof step.label !== "string" || !step.label.trim()) errors.push(`${stepAt}.label is required.`);
+          if (
+            step.dragonIds !== undefined &&
+            (!Array.isArray(step.dragonIds) ||
+              step.dragonIds.some((id) => !Number.isInteger(id) || Number(id) < 0) ||
+              new Set(step.dragonIds).size !== step.dragonIds.length)
+          ) errors.push(`${stepAt}.dragonIds must be unique non-negative integers.`);
+        });
+      }
       if (!isObject(raw.provenance)) errors.push(`${at}.provenance is required.`);
       else if (!["human", "agent", "detector"].includes(String(raw.provenance.source)))
         errors.push(`${at}.provenance.source is invalid.`);
