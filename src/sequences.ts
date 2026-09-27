@@ -224,14 +224,9 @@ export function sequenceCandidateToAnnotation(
     ],
     confidence: candidate.confidence,
     status: "candidate",
-    tags: ["sonar", "communication", "repeated-response"],
     teams: candidate.team ? [candidate.team] : undefined,
     dragonIds: [candidate.senderId, candidate.receiverId],
     steps,
-    highlights: [
-      { kind: "dragon", id: candidate.senderId, team: candidate.team, label: "Sender" },
-      { kind: "dragon", id: candidate.receiverId, team: candidate.team, label: "Receiver" },
-    ],
     evidence: [
       {
         description: "Repeated delivery rounds",

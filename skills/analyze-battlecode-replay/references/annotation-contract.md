@@ -35,7 +35,6 @@ For a `sequence`, each ordered `step` has its own `dragonIds` containing only th
 - `status`: normally `candidate` for new agent findings; use `needs-evidence`, `confirmed`, or `rejected` only when the evidence supports that review state.
 - `evidence`: reproducible event indices, rounds, metrics, and short descriptions.
 - `steps`: an ordered event chain with `anchor`, neutral `label`, and, when known, `eventType`, `team`, `dragonIds`, and lossless decimal-string sonar `payload`.
-- `tags`: required by schema version 1; use a small unique list or `[]`. Tags are not edited in the current UI.
 - `provenance`: use source `agent` for agent-created findings, identify the author/method, and set ISO-8601 `createdAt`/`updatedAt`. Preserve `createdAt` when editing.
 
-`highlights` is a legacy-compatible optional field and is not rendered by the current Research UI. Omit it for new agent annotations unless another consumer explicitly requires it.
+The annotation format does not include tags or map highlights. Put useful searchable concepts in the neutral title and evidence text, and represent interested dragons with `dragonIds`.

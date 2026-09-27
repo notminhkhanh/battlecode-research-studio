@@ -51,6 +51,20 @@ describe("research document", () => {
     );
   });
 
+  it("rejects removed tag and highlight fields", () => {
+    const document = newResearchDocument(replay, "2026-09-27T00:00:00.000Z");
+    const annotation = newAnnotation("general", "tester", undefined, "2026-09-27T00:00:00.000Z") as unknown as Record<string, unknown>;
+    annotation.tags = [];
+    annotation.highlights = [];
+    document.annotations.push(annotation as unknown as ReturnType<typeof newAnnotation>);
+    expect(validateResearchDocument(document)).toEqual(
+      expect.arrayContaining([
+        "annotations[0].tags is no longer supported.",
+        "annotations[0].highlights is no longer supported.",
+      ]),
+    );
+  });
+
   it("merges independently created annotations and keeps the latest edit", () => {
     const base = newResearchDocument(replay, "2026-09-27T00:00:00.000Z");
     const first = newAnnotation("general", "one", undefined, "2026-09-27T00:00:00.000Z");

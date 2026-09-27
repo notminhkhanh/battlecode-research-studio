@@ -31,11 +31,6 @@
       ],
       "confidence": 0.81,
       "status": "candidate",
-      "tags": [
-        "sonar",
-        "communication",
-        "repeated-response"
-      ],
       "teams": [
         "B"
       ],
@@ -123,20 +118,6 @@
           ]
         }
       ],
-      "highlights": [
-        {
-          "kind": "dragon",
-          "id": 27,
-          "team": "B",
-          "label": "Sender"
-        },
-        {
-          "kind": "dragon",
-          "id": 34,
-          "team": "B",
-          "label": "Receiver"
-        }
-      ],
       "evidence": [
         {
           "description": "Repeated delivery rounds",
@@ -186,11 +167,6 @@
       ],
       "confidence": 0.81,
       "status": "candidate",
-      "tags": [
-        "sonar",
-        "communication",
-        "repeated-response"
-      ],
       "teams": [
         "B"
       ],
@@ -276,20 +252,6 @@
           "dragonIds": [
             34
           ]
-        }
-      ],
-      "highlights": [
-        {
-          "kind": "dragon",
-          "id": 27,
-          "team": "B",
-          "label": "Sender"
-        },
-        {
-          "kind": "dragon",
-          "id": 34,
-          "team": "B",
-          "label": "Receiver"
         }
       ],
       "evidence": [

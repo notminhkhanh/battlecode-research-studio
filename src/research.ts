@@ -28,12 +28,6 @@ export interface SequenceStep {
   payload?: string;
 }
 
-export type MapHighlight =
-  | { kind: "cell"; x: number; y: number; label?: string; color?: string }
-  | { kind: "rect"; x: number; y: number; width: number; height: number; label?: string; color?: string }
-  | { kind: "path"; points: Array<{ x: number; y: number }>; label?: string; color?: string }
-  | { kind: "dragon"; id: number; team?: TeamId; label?: string; color?: string };
-
 export interface EvidenceRef {
   description: string;
   eventIndices?: number[];
@@ -61,11 +55,9 @@ export interface ResearchAnnotation {
   alternatives?: string[];
   confidence?: number;
   status: AnnotationStatus;
-  tags: string[];
   teams?: TeamId[];
   dragonIds?: number[];
   steps?: SequenceStep[];
-  highlights?: MapHighlight[];
   evidence?: EvidenceRef[];
   provenance: AnnotationProvenance;
 }
@@ -109,8 +101,6 @@ export function newAnnotation(
     ...(anchor && (kind === "range" || kind === "sequence") ? { end: anchor } : {}),
     observation: "",
     status: "candidate",
-    tags: [],
-    highlights: [],
     provenance: { source: "human", author, createdAt: now, updatedAt: now },
   };
 }
@@ -173,8 +163,8 @@ export function validateResearchDocument(value: unknown): string[] {
       if (typeof raw.observation !== "string") errors.push(`${at}.observation must be a string.`);
       if (!["candidate", "confirmed", "rejected", "needs-evidence"].includes(String(raw.status)))
         errors.push(`${at}.status is invalid.`);
-      if (!Array.isArray(raw.tags) || raw.tags.some((tag) => typeof tag !== "string"))
-        errors.push(`${at}.tags must be strings.`);
+      if ("tags" in raw) errors.push(`${at}.tags is no longer supported.`);
+      if ("highlights" in raw) errors.push(`${at}.highlights is no longer supported.`);
       if (raw.confidence !== undefined && (typeof raw.confidence !== "number" || raw.confidence < 0 || raw.confidence > 1))
         errors.push(`${at}.confidence must be between 0 and 1.`);
       if (raw.kind !== "general" && !isObject(raw.start)) errors.push(`${at}.start is required for timed annotations.`);

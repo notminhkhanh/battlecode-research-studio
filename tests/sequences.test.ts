@@ -37,5 +37,7 @@ describe("sonar sequence detection", () => {
     expect(annotation.hypothesis).toContain("may encode");
     expect(annotation.alternatives?.length).toBeGreaterThan(1);
     expect(annotation.steps?.length).toBe(candidate!.occurrences.length * 2);
+    expect(annotation).not.toHaveProperty("tags");
+    expect(annotation).not.toHaveProperty("highlights");
   });
 });
