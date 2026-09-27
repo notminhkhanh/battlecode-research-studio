@@ -29,4 +29,6 @@ One person can take several roles, but explicitly switching roles improves the q
 
 ## Sharing with a teammate
 
-Give the teammate collaborator access to the private GitHub repository. They clone with submodules, build/install the VSIX, and pull the same replay and sidecar. There is no account, server, API key, or hosted database in the MVP.
+For normal use, send the teammate the current VSIX and give them access to the private location containing the replay and sidecar. They install the VSIX, open the exact replay, and either let the adjacent sidecar load automatically or choose **Open bookmark file…**. They only need to clone with submodules and build the project if they are contributing extension code.
+
+The extension has no account, server, API key, or hosted database. Git or another private shared location is the collaboration layer. See the [User guide](USER_GUIDE.md) for installation, UI behavior, persistence rules, and troubleshooting.

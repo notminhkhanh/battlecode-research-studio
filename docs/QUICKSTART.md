@@ -2,16 +2,16 @@
 
 ## Install the extension
 
-1. Clone the private repository with `--recurse-submodules`.
-2. Run `pnpm install` and `pnpm package`.
-3. In VS Code, run **Extensions: Install from VSIX…** and choose the newest `battlecode-research-studio-*.vsix`.
-4. Give your teammate repository access; they follow the same three steps.
+1. Get the newest `battlecode-research-studio-*.vsix` from the team.
+2. In VS Code, run **Extensions: Install from VSIX…** and choose that file.
+3. Reload VS Code when prompted.
 
-When the extension is updated, pull with submodules, rebuild the VSIX, and reinstall it. During active development, pressing `F5` is faster.
+That is enough for normal use; Node.js, pnpm, and the source repository are only needed to build or develop the extension. When the extension is updated, install the newer VSIX the same way.
 
 ## Open and annotate a replay
 
 1. Open a `.replay` file. Battlecode Research Studio is the default custom editor.
+   If another editor opens it, use **Reopen Editor With… → Battlecode Research Replay**.
 2. The original **Info**, **Game Log**, and **Options** tabs and all original board interactions are unchanged. Open the additional **Research** tab for bookmarks.
 3. Use the original playback controls to seek by round, turn, or event. Left-click dragon heads to select the dragons involved; this opens their native metadata cards, vision, and Game Log filters.
 4. At an interesting moment, choose **+ Point** or **+ Range**. The new bookmark records the current round and selected dragon IDs, then opens an edit draft. For a range, enter its start/end rounds directly or use the current replay round for either anchor. Use **+ General** for a replay-wide note.
@@ -24,6 +24,8 @@ When the extension is updated, pull with submodules, rebuild the VSIX, and reins
 To use a bookmark file someone sent you, open the replay, go to **Research**, and choose **Open bookmark file…**. Selecting a bookmark seeks to its start and restores its referenced dragon IDs through the original viewer. Use **Use currently selected dragons** if you want to replace a bookmark's references with the dragons you selected manually.
 
 Saving does not modify the replay. The sidecar records the replay SHA-256 and the studio warns if the JSON is opened with different replay bytes.
+
+For field explanations, sharing instructions, and troubleshooting, read the full [User guide](USER_GUIDE.md).
 
 ## Review detected sonar sequences
 

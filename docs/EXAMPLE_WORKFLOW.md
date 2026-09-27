@@ -15,6 +15,8 @@ The replay is on the 32×16 map **Devil**, has 171 round-start events, 6,249 act
 
 Open `M228828.replay` in VS Code. The adjacent sidecar loads two detector candidates into the fixed, scrollable list in the additional **Research** tab; the detail area initially stays empty. Selecting one opens its read-only details, seeks to its saved start, and selects dragons #27 and #34 through the original viewer, so their pinned cards, vision, and Game Log filters are available. Press Play to review the interval—the viewer pauses at the saved end. Use its **Sequence evidence** steps to jump between messages and responses.
 
+If the replay does not open in the visualiser, use **Reopen Editor With… → Battlecode Research Replay**. If the sidecar is not adjacent to the replay, load `M228828.replay.research.json` with **Open bookmark file…**.
+
 ## 3. Review one candidate
 
 Candidate `sonar-27-34-b6840030cd3cc04d` observes:

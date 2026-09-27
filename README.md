@@ -20,9 +20,15 @@ The repository is private so the included `M228828.replay` and your team's analy
 
 This first detector deliberately finds high-signal leads rather than claiming it decoded another team's protocol. “Message X was followed by MOVE W three times” is an observation; “X orders the receiver west” remains a hypothesis until you test alternatives.
 
-## Get started
+## Get started as a user
 
-Requirements: VS Code 1.90+, Node.js 20+, pnpm, and Git with submodule access.
+Install the latest `battlecode-research-studio-*.vsix` with VS Code's **Extensions: Install from VSIX…** command, then open a `.replay` file. A teammate using a prebuilt VSIX only needs VS Code 1.90+.
+
+Start with the [user guide](docs/USER_GUIDE.md), then follow the [worked M228828 workflow](docs/EXAMPLE_WORKFLOW.md). The [team workflow](docs/TEAM_WORKFLOW.md) explains how to review and merge shared sidecars.
+
+## Build from source
+
+Building requires Node.js 20+, pnpm, and Git with submodule access.
 
 ```sh
 git clone --recurse-submodules git@github.com:notminhkhanh/battlecode-research-studio.git
@@ -35,7 +41,7 @@ Install the resulting `.vsix` in VS Code using **Extensions: Install from VSIX�
 
 For development, open this repository in VS Code, press `F5`, and open a replay in the Extension Development Host.
 
-Read [Quickstart](docs/QUICKSTART.md), then follow the [worked M228828 workflow](docs/EXAMPLE_WORKFLOW.md). The [team workflow](docs/TEAM_WORKFLOW.md) explains how to review and merge sidecars.
+The shorter [quickstart](docs/QUICKSTART.md) is useful as a checklist after the first installation.
 
 ## Agent and CLI workflow
 
@@ -54,7 +60,7 @@ src/            extension host, sidecar model, detector, CLI
 webview/        interactive Svelte replay research UI
 schemas/        portable research JSON schema
 skills/         reusable Codex analysis workflow
-docs/           teammate and analysis guides
+docs/           user, teammate, example, and AI-analysis guides
 examples/       M228828 replay plus reviewed detector output
 vendor/unswbc/  pinned organiser source as a Git submodule
 patches/        small additive hooks applied to the pinned organiser UI at build time
