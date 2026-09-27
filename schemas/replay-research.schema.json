@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/notminhkhanh/battlecode-research-studio/blob/main/schemas/replay-research.schema.json",
+  "title": "Battlecode Replay Research",
+  "type": "object",
+  "required": ["schemaVersion", "replay", "title", "summary", "annotations", "updatedAt"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "replay": { "$ref": "#/$defs/replay" },
+    "title": { "type": "string" },
+    "summary": { "type": "string" },
+    "annotations": { "type": "array", "items": { "$ref": "#/$defs/annotation" } },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "anchor": {
+      "type": "object",
+      "required": ["round"],
+      "additionalProperties": false,
+      "properties": {
+        "round": { "type": "integer", "minimum": 0 },
+        "eventIndex": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "replay": {
+      "type": "object",
+      "required": ["sha256", "filename", "formatVersion", "rounds"],
+      "additionalProperties": false,
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "filename": { "type": "string", "minLength": 1 },
+        "formatVersion": { "type": "integer", "minimum": 0 },
+        "mapName": { "type": "string" },
+        "rounds": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "highlight": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "x", "y"],
+          "properties": { "kind": { "const": "cell" }, "x": { "type": "number" }, "y": { "type": "number" }, "label": { "type": "string" }, "color": { "type": "string" } },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "x", "y", "width", "height"],
+          "properties": { "kind": { "const": "rect" }, "x": { "type": "number" }, "y": { "type": "number" }, "width": { "type": "number", "exclusiveMinimum": 0 }, "height": { "type": "number", "exclusiveMinimum": 0 }, "label": { "type": "string" }, "color": { "type": "string" } },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "points"],
+          "properties": { "kind": { "const": "path" }, "points": { "type": "array", "items": { "type": "object", "required": ["x", "y"], "properties": { "x": { "type": "number" }, "y": { "type": "number" } }, "additionalProperties": false } }, "label": { "type": "string" }, "color": { "type": "string" } },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "id"],
+          "properties": { "kind": { "const": "dragon" }, "id": { "type": "integer", "minimum": 0 }, "team": { "enum": ["A", "B"] }, "label": { "type": "string" }, "color": { "type": "string" } },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "annotation": {
+      "type": "object",
+      "required": ["id", "kind", "title", "observation", "status", "tags", "provenance"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["general", "point", "range", "sequence"] },
+        "title": { "type": "string", "minLength": 1 },
+        "start": { "$ref": "#/$defs/anchor" },
+        "end": { "$ref": "#/$defs/anchor" },
+        "observation": { "type": "string" },
+        "hypothesis": { "type": "string" },
+        "alternatives": { "type": "array", "items": { "type": "string" } },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "status": { "enum": ["candidate", "confirmed", "rejected", "needs-evidence"] },
+        "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "teams": { "type": "array", "items": { "enum": ["A", "B"] }, "uniqueItems": true },
+        "dragonIds": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "uniqueItems": true },
+        "steps": { "type": "array", "items": { "type": "object" } },
+        "highlights": { "type": "array", "items": { "$ref": "#/$defs/highlight" } },
+        "evidence": { "type": "array", "items": { "type": "object" } },
+        "provenance": {
+          "type": "object",
+          "required": ["source", "author", "createdAt", "updatedAt"],
+          "additionalProperties": false,
+          "properties": {
+            "source": { "enum": ["human", "agent", "detector"] },
+            "author": { "type": "string" },
+            "createdAt": { "type": "string", "format": "date-time" },
+            "updatedAt": { "type": "string", "format": "date-time" },
+            "detector": { "type": "string" }
+          }
+        }
+      },
+      "allOf": [
+        { "if": { "properties": { "kind": { "not": { "const": "general" } } } }, "then": { "required": ["start"] } },
+        { "if": { "properties": { "kind": { "const": "range" } } }, "then": { "required": ["end"] } }
+      ]
+    }
+  }
+}

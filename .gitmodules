@@ -1,0 +1,3 @@
+[submodule "vendor/unswbc"]
+	path = vendor/unswbc
+	url = https://github.com/unswcpmsoc/unswbc.git

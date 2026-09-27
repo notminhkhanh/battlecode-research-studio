@@ -1,0 +1,325 @@
+{
+  "schemaVersion": 1,
+  "replay": {
+    "sha256": "c49c237a58cc55452b1dee022aa0128573c9341c5a300581c69a64ede6f68b43",
+    "filename": "M228828.replay",
+    "formatVersion": 2,
+    "mapName": "Devil",
+    "rounds": 171
+  },
+  "title": "Devil research",
+  "summary": "Initial machine-generated candidates. Review each observation and hypothesis in the visualiser.",
+  "annotations": [
+    {
+      "id": "sonar-27-34-b6840030cd3cc04d",
+      "kind": "sequence",
+      "title": "Repeated sonar #27 → #34 before MOVE W",
+      "start": {
+        "round": 68,
+        "eventIndex": 10760
+      },
+      "end": {
+        "round": 76,
+        "eventIndex": 12885
+      },
+      "observation": "0xb6840030cd3cc04d was delivered 3 times from #27 to #34; 100% were followed by MOVE W.",
+      "hypothesis": "The payload may encode a direction, target, role, or task that influences the receiver's next action.",
+      "alternatives": [
+        "The receiver may already have been following the same route independently.",
+        "The payload may report state rather than instruct an action.",
+        "A shared deterministic policy may explain both the payload and the response."
+      ],
+      "confidence": 0.81,
+      "status": "candidate",
+      "tags": [
+        "sonar",
+        "communication",
+        "repeated-response"
+      ],
+      "teams": [
+        "B"
+      ],
+      "dragonIds": [
+        27,
+        34
+      ],
+      "steps": [
+        {
+          "anchor": {
+            "round": 68,
+            "eventIndex": 10760
+          },
+          "label": "#27 sent 0xb6840030cd3cc04d to #34",
+          "eventType": "sonarPing",
+          "team": "B",
+          "dragonIds": [
+            27,
+            34
+          ],
+          "payload": "13151637021430431821"
+        },
+        {
+          "anchor": {
+            "round": 68,
+            "eventIndex": 10799
+          },
+          "label": "#34 next chose MOVE W",
+          "eventType": "dragonAction",
+          "team": "B",
+          "dragonIds": [
+            34
+          ]
+        },
+        {
+          "anchor": {
+            "round": 72,
+            "eventIndex": 11800
+          },
+          "label": "#27 sent 0xb6840030cd3cc04d to #34",
+          "eventType": "sonarPing",
+          "team": "B",
+          "dragonIds": [
+            27,
+            34
+          ],
+          "payload": "13151637021430431821"
+        },
+        {
+          "anchor": {
+            "round": 72,
+            "eventIndex": 11831
+          },
+          "label": "#34 next chose MOVE W",
+          "eventType": "dragonAction",
+          "team": "B",
+          "dragonIds": [
+            34
+          ]
+        },
+        {
+          "anchor": {
+            "round": 76,
+            "eventIndex": 12852
+          },
+          "label": "#27 sent 0xb6840030cd3cc04d to #34",
+          "eventType": "sonarPing",
+          "team": "B",
+          "dragonIds": [
+            27,
+            34
+          ],
+          "payload": "13151637021430431821"
+        },
+        {
+          "anchor": {
+            "round": 76,
+            "eventIndex": 12885
+          },
+          "label": "#34 next chose MOVE W",
+          "eventType": "dragonAction",
+          "team": "B",
+          "dragonIds": [
+            34
+          ]
+        }
+      ],
+      "highlights": [
+        {
+          "kind": "dragon",
+          "id": 27,
+          "team": "B",
+          "label": "Sender"
+        },
+        {
+          "kind": "dragon",
+          "id": 34,
+          "team": "B",
+          "label": "Receiver"
+        }
+      ],
+      "evidence": [
+        {
+          "description": "Repeated delivery rounds",
+          "eventIndices": [
+            10760,
+            11800,
+            12852
+          ],
+          "rounds": [
+            68,
+            72,
+            76
+          ]
+        },
+        {
+          "description": "Response consistency",
+          "metric": "matching_next_action_ratio",
+          "value": 1
+        }
+      ],
+      "provenance": {
+        "source": "detector",
+        "author": "battlecode-sequence-detector",
+        "detector": "exact-sonar-response-v1",
+        "createdAt": "2026-09-27T04:07:01.140Z",
+        "updatedAt": "2026-09-27T04:07:01.140Z"
+      }
+    },
+    {
+      "id": "sonar-27-34-b68400334d08d04c",
+      "kind": "sequence",
+      "title": "Repeated sonar #27 → #34 before MOVE S",
+      "start": {
+        "round": 59,
+        "eventIndex": 8596
+      },
+      "end": {
+        "round": 79,
+        "eventIndex": 13724
+      },
+      "observation": "0xb68400334d08d04c was delivered 3 times from #27 to #34; 100% were followed by MOVE S.",
+      "hypothesis": "The payload may encode a direction, target, role, or task that influences the receiver's next action.",
+      "alternatives": [
+        "The receiver may already have been following the same route independently.",
+        "The payload may report state rather than instruct an action.",
+        "A shared deterministic policy may explain both the payload and the response."
+      ],
+      "confidence": 0.81,
+      "status": "candidate",
+      "tags": [
+        "sonar",
+        "communication",
+        "repeated-response"
+      ],
+      "teams": [
+        "B"
+      ],
+      "dragonIds": [
+        27,
+        34
+      ],
+      "steps": [
+        {
+          "anchor": {
+            "round": 59,
+            "eventIndex": 8596
+          },
+          "label": "#27 sent 0xb68400334d08d04c to #34",
+          "eventType": "sonarPing",
+          "team": "B",
+          "dragonIds": [
+            27,
+            34
+          ],
+          "payload": "13151637032164446284"
+        },
+        {
+          "anchor": {
+            "round": 59,
+            "eventIndex": 8634
+          },
+          "label": "#34 next chose MOVE S",
+          "eventType": "dragonAction",
+          "team": "B",
+          "dragonIds": [
+            34
+          ]
+        },
+        {
+          "anchor": {
+            "round": 63,
+            "eventIndex": 9514
+          },
+          "label": "#27 sent 0xb68400334d08d04c to #34",
+          "eventType": "sonarPing",
+          "team": "B",
+          "dragonIds": [
+            27,
+            34
+          ],
+          "payload": "13151637032164446284"
+        },
+        {
+          "anchor": {
+            "round": 63,
+            "eventIndex": 9552
+          },
+          "label": "#34 next chose MOVE S",
+          "eventType": "dragonAction",
+          "team": "B",
+          "dragonIds": [
+            34
+          ]
+        },
+        {
+          "anchor": {
+            "round": 79,
+            "eventIndex": 13699
+          },
+          "label": "#27 sent 0xb68400334d08d04c to #34",
+          "eventType": "sonarPing",
+          "team": "B",
+          "dragonIds": [
+            27,
+            34
+          ],
+          "payload": "13151637032164446284"
+        },
+        {
+          "anchor": {
+            "round": 79,
+            "eventIndex": 13724
+          },
+          "label": "#34 next chose MOVE S",
+          "eventType": "dragonAction",
+          "team": "B",
+          "dragonIds": [
+            34
+          ]
+        }
+      ],
+      "highlights": [
+        {
+          "kind": "dragon",
+          "id": 27,
+          "team": "B",
+          "label": "Sender"
+        },
+        {
+          "kind": "dragon",
+          "id": 34,
+          "team": "B",
+          "label": "Receiver"
+        }
+      ],
+      "evidence": [
+        {
+          "description": "Repeated delivery rounds",
+          "eventIndices": [
+            8596,
+            9514,
+            13699
+          ],
+          "rounds": [
+            59,
+            63,
+            79
+          ]
+        },
+        {
+          "description": "Response consistency",
+          "metric": "matching_next_action_ratio",
+          "value": 1
+        }
+      ],
+      "provenance": {
+        "source": "detector",
+        "author": "battlecode-sequence-detector",
+        "detector": "exact-sonar-response-v1",
+        "createdAt": "2026-09-27T04:07:01.140Z",
+        "updatedAt": "2026-09-27T04:07:01.140Z"
+      }
+    }
+  ],
+  "updatedAt": "2026-09-27T04:07:01.117Z"
+}

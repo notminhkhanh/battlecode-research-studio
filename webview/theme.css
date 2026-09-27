@@ -1,0 +1,17 @@
+:root {
+  --studio-bg: var(--vscode-editor-background, #0d1117);
+  --studio-panel: var(--vscode-sideBar-background, #151b23);
+  --studio-raised: var(--vscode-editorWidget-background, #1c2430);
+  --studio-text: var(--vscode-foreground, #e6edf3);
+  --studio-muted: var(--vscode-descriptionForeground, #98a2b3);
+  --studio-border: var(--vscode-panel-border, #30363d);
+  --studio-accent: var(--vscode-focusBorder, #48b8ae);
+  --studio-danger: var(--vscode-errorForeground, #f06a6a);
+  --font-mono: var(--vscode-editor-font-family, ui-monospace, monospace);
+}
+
+html, body, #app { height: 100%; margin: 0; overflow: hidden; }
+body { font-family: var(--vscode-font-family, system-ui); color: var(--studio-text); background: var(--studio-bg); }
+button, input, textarea, select { font: inherit; }
+button { cursor: pointer; }
+* { box-sizing: border-box; }

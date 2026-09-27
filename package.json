@@ -1,0 +1,65 @@
+{
+  "name": "battlecode-research-studio",
+  "displayName": "Battlecode Research Studio",
+  "description": "Investigate Battlecode replays with shareable annotations and communication sequence analysis.",
+  "version": "0.1.0",
+  "publisher": "notminhkhanh",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/notminhkhanh/battlecode-research-studio.git"
+  },
+  "type": "module",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "main": "./dist/extension.cjs",
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    }
+  },
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "battlecodeResearch.replayViewer",
+        "displayName": "Battlecode Research Replay",
+        "selector": [
+          {
+            "filenamePattern": "*.replay"
+          }
+        ],
+        "priority": "default"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "vite build && node build.mjs",
+    "check": "svelte-check --tsconfig ./tsconfig.json && tsc --noEmit",
+    "test": "vitest run",
+    "package": "pnpm build && vsce package --no-dependencies --allow-missing-repository",
+    "cli": "tsx src/cli.ts"
+  },
+  "dependencies": {
+    "@lucide/svelte": "^1.47.0",
+    "capnp-es": "^0.0.16",
+    "svelte": "^5.55.2"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^7.0.0",
+    "@types/node": "^22.15.0",
+    "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^3.6.0",
+    "esbuild": "^0.28.0",
+    "svelte-check": "^4.4.6",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vite": "^8.0.7",
+    "vitest": "^3.2.0"
+  }
+}

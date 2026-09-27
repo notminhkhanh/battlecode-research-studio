@@ -1,0 +1,4 @@
+interface:
+  display_name: "Analyze Battlecode Replay"
+  short_description: "Find evidence-backed strategy patterns in Battlecode replays"
+  default_prompt: "Analyze this Battlecode replay, identify interesting communication and behaviour sequences, and write evidence-backed research annotations."
