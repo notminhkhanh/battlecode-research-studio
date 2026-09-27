@@ -37,11 +37,15 @@ class ReplayEditorProvider implements vscode.CustomReadonlyEditorProvider<vscode
           }
           researchText = undefined;
         }
+        const replaySource =
+          document.uri.scheme === "file"
+            ? { replayUrl: panel.webview.asWebviewUri(document.uri).toString() }
+            : { replayBytes: Array.from(replayBytes) };
         await panel.webview.postMessage({
           type: "open",
           name: document.uri.path.split("/").pop() ?? "replay",
-          replayBytes,
           researchText,
+          ...replaySource,
         });
       } catch (error) {
         await panel.webview.postMessage({ type: "error", message: String(error) });
@@ -87,6 +91,7 @@ class ReplayEditorProvider implements vscode.CustomReadonlyEditorProvider<vscode
       `img-src ${webview.cspSource} data: blob:`,
       `style-src ${webview.cspSource} 'unsafe-inline'`,
       `font-src ${webview.cspSource}`,
+      `connect-src ${webview.cspSource}`,
       `script-src 'nonce-${id}'`,
     ].join("; ");
     return `<!doctype html><html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" /><meta http-equiv="Content-Security-Policy" content="${csp}" /><link rel="stylesheet" href="${style}" /></head><body><div id="app"></div><script nonce="${id}" src="${script}"></script></body></html>`;

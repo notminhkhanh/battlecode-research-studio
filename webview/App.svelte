@@ -158,13 +158,25 @@
   function save(saveAs = false) {
     if (!research) return;
     touch(selected);
-    api.postMessage({ type: saveAs ? "saveAs" : "save", document: research });
+    // Svelte's deep state is a Proxy, which VS Code's real message bridge
+    // cannot structured-clone. Serialize once to send an ordinary object.
+    const document = JSON.parse(JSON.stringify(research)) as ResearchDocument;
+    api.postMessage({ type: saveAs ? "saveAs" : "save", document });
   }
 
   onMount(() => {
     const receive = (event: MessageEvent) => {
       const message = event.data;
-      if (message?.type === "open") void open(new Uint8Array(message.replayBytes), message.name, message.researchText);
+      if (message?.type === "open") {
+        if (message.replayUrl) {
+          void fetch(message.replayUrl)
+            .then((response) => response.arrayBuffer())
+            .then((bytes) => open(new Uint8Array(bytes), message.name, message.researchText))
+            .catch((error) => (errorMessage = error instanceof Error ? error.message : String(error)));
+        } else {
+          void open(new Uint8Array(message.replayBytes), message.name, message.researchText);
+        }
+      }
       else if (message?.type === "error" || message?.type === "save-error") errorMessage = message.message;
       else if (message?.type === "saved") notice = `Saved ${message.path}`;
     };
