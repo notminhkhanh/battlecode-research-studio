@@ -1,0 +1,203 @@
+diff --git a/packages/visualiser/src/components/ReplayInspector.svelte b/packages/visualiser/src/components/ReplayInspector.svelte
+index 2cc144c..ecbfc6a 100644
+--- a/packages/visualiser/src/components/ReplayInspector.svelte
++++ b/packages/visualiser/src/components/ReplayInspector.svelte
+@@ -8,6 +8,7 @@
+     Stacked, it grows past its host's height, so the host has to scroll.
+ -->
+ <script lang="ts">
++    import type { Snippet } from "svelte";
+     import GameLog from "./GameLog.svelte";
+     import MatchCharts from "./MatchCharts.svelte";
+     import ReplayViewer from "./ReplayViewer.svelte";
+@@ -17,6 +18,7 @@
+     import { MARKER_KINDS, persistSettings, settings, teamColor, type MarkerKind } from "../settings.svelte";
+     import { resultLabel, type LoadedReplay } from "../replay/loader";
+     import type GameRunner from "../visualiser/GameRunner.svelte";
++    import type { BoardProjection } from "../visualiser/BoardView.svelte";
+ 
+     let {
+         loaded,
+@@ -24,6 +26,9 @@
+         file,
+         mapName,
+         hosted = false,
++        researchPanel,
++        boardOverlay,
++        researchTrack,
+     }: {
+         loaded: LoadedReplay;
+         runner: GameRunner;
+@@ -36,22 +41,38 @@
+          * not the rest of the ladder's business.
+          */
+         hosted?: boolean;
++        /** Optional host research tab, added without replacing standard tabs. */
++        researchPanel?: Snippet;
++        /** Optional additive board layer passed through the normal ReplayViewer. */
++        boardOverlay?: Snippet<[BoardProjection]>;
++        /** Optional additive timeline strip above the standard controls. */
++        researchTrack?: Snippet;
+     } = $props();
+ 
+-    const TABS = [
++    const STANDARD_TABS = [
+         { id: "info", label: "Info" },
+         { id: "log", label: "Game Log" },
+         { id: "options", label: "Options" },
+     ] as const;
+-    type Tab = (typeof TABS)[number]["id"];
++    type Tab = "research" | (typeof STANDARD_TABS)[number]["id"];
++    const tabs = $derived(
++        researchPanel ? ([{ id: "research", label: "Research" }, ...STANDARD_TABS] as const) : STANDARD_TABS,
++    );
+     let tab: Tab = $state("info");
++    let researchOpened = $state(false);
++    $effect(() => {
++        if (researchPanel && !researchOpened) {
++            tab = "research";
++            researchOpened = true;
++        }
++    });
+ 
+     function cycleTab(e: KeyboardEvent) {
+         const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+         if (!step) return;
+         e.preventDefault();
+-        const at = TABS.findIndex((t) => t.id === tab);
+-        tab = TABS[(at + step + TABS.length) % TABS.length].id;
++        const at = tabs.findIndex((t) => t.id === tab);
++        tab = tabs[(at + step + tabs.length) % tabs.length].id;
+         document.getElementById(`tab-${tab}`)?.focus();
+     }
+ 
+@@ -122,7 +143,7 @@
+         <aside class="side" style:--side-width="{sidebarWidth}px">
+             <div class="side-inner">
+                 <div class="tabs" role="tablist" tabindex="-1" aria-label="Replay detail" onkeydown={cycleTab}>
+-                    {#each TABS as t (t.id)}
++                    {#each tabs as t (t.id)}
+                         <button
+                             type="button"
+                             role="tab"
+@@ -137,7 +158,17 @@
+                     {/each}
+                 </div>
+ 
+-                {#if tab === "log"}
++                {#if tab === "research" && researchPanel}
++                    <div
++                        class="panel research"
++                        role="tabpanel"
++                        tabindex="0"
++                        id="panel-research"
++                        aria-labelledby="tab-research"
++                    >
++                        {@render researchPanel()}
++                    </div>
++                {:else if tab === "log"}
+                     <div class="panel log" role="tabpanel" tabindex="0" id="panel-log" aria-labelledby="tab-log">
+                         <GameLog match={loaded.match} {runner} teams={loaded.teams} />
+                     </div>
+@@ -256,7 +287,7 @@
+         ></button>
+ 
+         <div class="main">
+-            <ReplayViewer {loaded} {runner} fill name={file} />
++            <ReplayViewer {loaded} {runner} fill name={file} {boardOverlay} {researchTrack} />
+         </div>
+     </div>
+ </div>
+diff --git a/packages/visualiser/src/components/ReplayViewer.svelte b/packages/visualiser/src/components/ReplayViewer.svelte
+index aaaa9c4..dfeb0a9 100644
+--- a/packages/visualiser/src/components/ReplayViewer.svelte
++++ b/packages/visualiser/src/components/ReplayViewer.svelte
+@@ -11,7 +11,9 @@
+     in both.
+ -->
+ <script lang="ts">
++    import type { Snippet } from "svelte";
+     import BoardStage from "../visualiser/BoardStage.svelte";
++    import type { BoardProjection } from "../visualiser/BoardView.svelte";
+     import GameRunner from "../visualiser/GameRunner.svelte";
+     import PlaybackControls from "../visualiser/PlaybackControls.svelte";
+     import { X } from "@lucide/svelte";
+@@ -26,6 +28,8 @@
+         maxCell = 160,
+         fill = false,
+         name = "replay",
++        boardOverlay,
++        researchTrack,
+     }: {
+         loaded: LoadedReplay;
+         /** Share a runner across renders (the /visualiser tab does, to survive navigation). */
+@@ -35,6 +39,10 @@
+         fill?: boolean;
+         /** Base for a saved image's file name. */
+         name?: string;
++        /** Additive layer over the board; the normal entity layer stays active. */
++        boardOverlay?: Snippet<[BoardProjection]>;
++        /** Additive strip between the board and standard playback controls. */
++        researchTrack?: Snippet;
+     } = $props();
+ 
+     let root: HTMLDivElement | undefined = $state();
+@@ -89,8 +97,17 @@
+ 
+ <div class="replay-viewer" class:fill class:full={fullBoard} bind:this={root}>
+     <div class="viewer-stage" style:aspect-ratio={fill ? null : `${board.width} / ${board.height}`}>
+-        <BoardStage match={loaded.match} {runner} {mapSkin} {dragonSkin} {maxCell} class="board" />
++        <BoardStage
++            match={loaded.match}
++            {runner}
++            {mapSkin}
++            {dragonSkin}
++            {maxCell}
++            hostOverlay={boardOverlay}
++            class="board"
++        />
+     </div>
++    {@render researchTrack?.()}
+     <div class="viewer-dock">
+         <PlaybackControls
+             {runner}
+diff --git a/packages/visualiser/src/visualiser/BoardStage.svelte b/packages/visualiser/src/visualiser/BoardStage.svelte
+index aa2c7f7..6fcb662 100644
+--- a/packages/visualiser/src/visualiser/BoardStage.svelte
++++ b/packages/visualiser/src/visualiser/BoardStage.svelte
+@@ -4,7 +4,8 @@
+ 	window drops an entity back to salient if the cursor is still on it.
+ -->
+ <script lang="ts">
+-    import BoardView from "./BoardView.svelte";
++    import type { Snippet } from "svelte";
++    import BoardView, { type BoardProjection } from "./BoardView.svelte";
+     import EntityPanel from "./EntityPanel.svelte";
+     import EntityWindow from "./EntityWindow.svelte";
+     import { PearlClock } from "./PearlClock";
+@@ -23,6 +24,7 @@
+         dragonSkin,
+         minCell = 6,
+         maxCell = 44,
++        hostOverlay,
+         class: className = "",
+     }: {
+         match: Match;
+@@ -31,6 +33,8 @@
+         dragonSkin: DragonSkin;
+         minCell?: number;
+         maxCell?: number;
++        /** Additive host layer; entity hover, pinning and vision remain owned here. */
++        hostOverlay?: Snippet<[BoardProjection]>;
+         class?: string;
+     } = $props();
+ 
+@@ -195,6 +199,8 @@
+     class={className}
+ >
+     {#snippet overlay(projection)}
++        {@render hostOverlay?.(projection)}
++
+         {#if boardHover && !pinned.some((pin) => pin.entity.id === boardHover?.id)}
+             {@const at = tooltipPosition(projection.viewport)}
+             <div bind:this={tooltipElement} class="entity-tip" style:left="{at.x}px" style:top="{at.y}px">

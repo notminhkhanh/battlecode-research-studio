@@ -39,9 +39,10 @@
     ]
   },
   "scripts": {
-    "build": "vite build && node build.mjs",
-    "check": "svelte-check --tsconfig ./tsconfig.json && tsc --noEmit",
-    "dev:webview": "vite --host 127.0.0.1",
+    "prepare:vendor": "node scripts/apply-unswbc-patches.mjs",
+    "build": "pnpm prepare:vendor && vite build && node build.mjs",
+    "check": "pnpm prepare:vendor && svelte-check --tsconfig ./tsconfig.json && tsc --noEmit",
+    "dev:webview": "pnpm prepare:vendor && vite --host 127.0.0.1",
     "test": "vitest run",
     "package": "pnpm build && vsce package --no-dependencies --allow-missing-repository",
     "cli": "tsx src/cli.ts"

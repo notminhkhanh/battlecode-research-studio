@@ -23,6 +23,7 @@ class ReplayEditorProvider implements vscode.CustomReadonlyEditorProvider<vscode
     const roots = [media, vscode.Uri.joinPath(document.uri, "..")];
     panel.webview.options = { enableScripts: true, localResourceRoots: roots };
     panel.webview.html = this.html(panel.webview, media);
+    let researchUri = sidecarUri(document.uri);
 
     const postOpen = async () => {
       try {
@@ -45,6 +46,7 @@ class ReplayEditorProvider implements vscode.CustomReadonlyEditorProvider<vscode
           type: "open",
           name: document.uri.path.split("/").pop() ?? "replay",
           researchText,
+          researchPath: researchUri.fsPath,
           ...replaySource,
         });
       } catch (error) {
@@ -54,12 +56,30 @@ class ReplayEditorProvider implements vscode.CustomReadonlyEditorProvider<vscode
 
     panel.webview.onDidReceiveMessage(async (message) => {
       if (message?.type === "ready") await postOpen();
+      if (message?.type === "openResearch") {
+        const [target] =
+          (await vscode.window.showOpenDialog({
+            defaultUri: vscode.Uri.joinPath(document.uri, ".."),
+            canSelectMany: false,
+            filters: { "Battlecode bookmark files": ["json"] },
+            title: "Open replay bookmark file",
+          })) ?? [];
+        if (!target) return;
+        try {
+          const researchText = new TextDecoder().decode(await vscode.workspace.fs.readFile(target));
+          parseResearchDocument(researchText);
+          researchUri = target;
+          await panel.webview.postMessage({ type: "research-loaded", researchText, path: target.fsPath });
+        } catch (error) {
+          await panel.webview.postMessage({ type: "research-error", message: `Could not open bookmark file: ${String(error)}` });
+        }
+      }
       if (message?.type === "save") {
         try {
           const text = `${JSON.stringify(message.document, null, 2)}\n`;
           parseResearchDocument(text);
-          await vscode.workspace.fs.writeFile(sidecarUri(document.uri), new TextEncoder().encode(text));
-          await panel.webview.postMessage({ type: "saved", path: sidecarUri(document.uri).fsPath });
+          await vscode.workspace.fs.writeFile(researchUri, new TextEncoder().encode(text));
+          await panel.webview.postMessage({ type: "saved", path: researchUri.fsPath });
         } catch (error) {
           await panel.webview.postMessage({ type: "save-error", message: String(error) });
         }
@@ -74,6 +94,7 @@ class ReplayEditorProvider implements vscode.CustomReadonlyEditorProvider<vscode
           const text = `${JSON.stringify(message.document, null, 2)}\n`;
           parseResearchDocument(text);
           await vscode.workspace.fs.writeFile(target, new TextEncoder().encode(text));
+          researchUri = target;
           await panel.webview.postMessage({ type: "saved", path: target.fsPath });
         } catch (error) {
           await panel.webview.postMessage({ type: "save-error", message: String(error) });

@@ -1,6 +1,6 @@
 # Battlecode Research Studio
 
-Battlecode Research Studio is a VS Code replay viewer for collaborative strategy research. It keeps the organiser's open-source renderer and adds a shareable research layer: bookmarks, time ranges, hypotheses, map highlights, and communication/action sequences.
+Battlecode Research Studio is an additive extension of the organiser's VS Code replay viewer for collaborative strategy research. It keeps the original board, playback controls, hover metadata, pinned dragon cards, following, vision, Game Log filters, Info and Options, then adds one Research tab for shareable bookmarks, time ranges, hypotheses, map regions, and communication/action sequences.
 
 The repository is private so the included `M228828.replay` and your team's analysis stay within the team.
 
@@ -8,11 +8,11 @@ The repository is private so the included `M228828.replay` and your team's analy
 
 - Open `*.replay` files directly in VS Code with the official UNSW Battlecode renderer.
 - Add general notes, point bookmarks, and round ranges.
-- Highlight cells and the dragons involved in an annotation.
-- Review a research track above the normal replay controls and jump to evidence.
+- Reference dragons in an annotation using the viewer's native selection system. Selecting the bookmark opens the original pinned cards, vision, and Game Log filters.
+- Jump from an annotation or sequence step to its evidence without replacing the normal replay controls.
 - Detect repeated exact sonar messages between allies and the receiver's next action.
 - Keep observations, hypotheses, alternatives, confidence, and review status separate.
-- Save everything beside the replay as `<replay>.research.json`, or use **Save as…**.
+- Open any shared bookmark file from the Research tab. Save beside the replay as `<replay>.research.json`, or use **Save as…**.
 - Share the JSON sidecar through Git without duplicating the replay for every edit.
 
 This first detector deliberately finds high-signal leads rather than claiming it decoded another team's protocol. “Message X was followed by MOVE W three times” is an observation; “X orders the receiver west” remains a hypothesis until you test alternatives.
@@ -54,6 +54,7 @@ skills/         reusable Codex analysis workflow
 docs/           teammate and analysis guides
 examples/       M228828 replay plus reviewed detector output
 vendor/unswbc/  pinned organiser source as a Git submodule
+patches/        small additive hooks applied to the pinned organiser UI at build time
 ```
 
 ## Current scope

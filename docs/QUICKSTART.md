@@ -12,12 +12,15 @@ When the extension is updated, pull with submodules, rebuild the VSIX, and reins
 ## Open and annotate a replay
 
 1. Open a `.replay` file. Battlecode Research Studio is the default custom editor.
-2. Use the original playback controls to seek by round, turn, or event.
-3. At an interesting moment, choose **+ Point**. Use **+ Range**, seek forward, and choose **Set end** for a time span. Use **+ General** for a replay-wide note.
-4. Write the direct observation first. Put interpretation in **Hypothesis**, and list plausible competing explanations separately.
-5. Choose **Highlight map cells**, then click relevant cells on the board. Click a selected cell again to remove it.
-6. Set confidence and status. `candidate` means interesting but unverified; `needs-evidence` asks for a follow-up; `confirmed` means the team has reviewed enough evidence; `rejected` preserves a disproved lead.
-7. Choose **Save sidecar**. The default file is `<replay>.research.json` beside the replay.
+2. The original **Info**, **Game Log**, and **Options** tabs and all original board interactions are unchanged. Open the additional **Research** tab for bookmarks.
+3. Use the original playback controls to seek by round, turn, or event. Left-click dragon heads to select the dragons involved; this opens their native metadata cards, vision, and Game Log filters.
+4. At an interesting moment, choose **+ Point**. The new bookmark records the currently selected dragon IDs. Use **+ Range**, seek forward, and choose **Set end** for a time span. Use **+ General** for a replay-wide note.
+5. Write the direct observation first. Put interpretation in **Hypothesis**, and list plausible competing explanations separately.
+6. Choose **Highlight map cells**, then click relevant cells on the board. Click a selected cell again to remove it. Dragon highlighting itself remains owned by the original viewer.
+7. Set confidence and status. `candidate` means interesting but unverified; `needs-evidence` asks for a follow-up; `confirmed` means the team has reviewed enough evidence; `rejected` preserves a disproved lead.
+8. Choose **Save**. The default file is `<replay>.research.json` beside the replay.
+
+To use a bookmark file someone sent you, open the replay, go to **Research**, and choose **Open bookmark file…**. Selecting a bookmark seeks to its start and restores its referenced dragon IDs through the original viewer. Use **Use currently selected dragons** if you want to replace a bookmark's references with the dragons you selected manually.
 
 Saving does not modify the replay. The sidecar records the replay SHA-256 and the studio warns if the JSON is opened with different replay bytes.
 
@@ -39,4 +42,4 @@ pnpm cli summary path/to/match.replay
 pnpm cli detect path/to/match.replay
 ```
 
-The second command creates `path/to/match.replay.research.json`. Open the replay in VS Code, review the candidates, edit the sidecar, and save.
+The second command creates `path/to/match.replay.research.json`. Open the replay in VS Code; if the file is not adjacent to the replay, load it with **Research → Open bookmark file…**. Review the candidates, edit the sidecar, and save.

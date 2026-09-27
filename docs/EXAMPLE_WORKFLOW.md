@@ -13,7 +13,7 @@ The replay is on the 32×16 map **Devil**, has 171 round-start events, 6,249 act
 
 ## 2. Open the replay
 
-Open `M228828.replay` in VS Code. The adjacent sidecar loads two detector candidates. Select one and use its **Sequence evidence** steps to jump between messages and responses.
+Open `M228828.replay` in VS Code. The adjacent sidecar loads two detector candidates in the additional **Research** tab. Selecting one seeks to its start and selects dragons #27 and #34 through the original viewer, so their pinned cards, vision, and Game Log filters are available. Use its **Sequence evidence** steps to jump between messages and responses.
 
 ## 3. Review one candidate
 

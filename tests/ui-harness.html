@@ -23,6 +23,12 @@
             );
           } else if (message.type === "save" || message.type === "saveAs") {
             window.postMessage({ type: "saved", path: "/tmp/M228828.replay.research.json" }, "*");
+          } else if (message.type === "openResearch") {
+            const researchText = await fetch("/examples/M228828/M228828.replay.research.json").then((response) => response.text());
+            window.postMessage(
+              { type: "research-loaded", researchText, path: "/tmp/imported.research.json" },
+              "*",
+            );
           }
         },
       });
