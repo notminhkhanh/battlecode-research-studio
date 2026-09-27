@@ -4,7 +4,7 @@
 
 1. Clone the private repository with `--recurse-submodules`.
 2. Run `pnpm install` and `pnpm package`.
-3. In VS Code, run **Extensions: Install from VSIX…** and choose `battlecode-research-studio-0.1.0.vsix`.
+3. In VS Code, run **Extensions: Install from VSIX…** and choose the newest `battlecode-research-studio-*.vsix`.
 4. Give your teammate repository access; they follow the same three steps.
 
 When the extension is updated, pull with submodules, rebuild the VSIX, and reinstall it. During active development, pressing `F5` is faster.
@@ -14,10 +14,12 @@ When the extension is updated, pull with submodules, rebuild the VSIX, and reins
 1. Open a `.replay` file. Battlecode Research Studio is the default custom editor.
 2. The original **Info**, **Game Log**, and **Options** tabs and all original board interactions are unchanged. Open the additional **Research** tab for bookmarks.
 3. Use the original playback controls to seek by round, turn, or event. Left-click dragon heads to select the dragons involved; this opens their native metadata cards, vision, and Game Log filters.
-4. At an interesting moment, choose **+ Point**. The new bookmark records the currently selected dragon IDs. Use **+ Range**, seek forward, and choose **Set end** for a time span. Use **+ General** for a replay-wide note.
-5. Write the direct observation first. Put interpretation in **Hypothesis**, and list plausible competing explanations separately.
-6. Set confidence and status. `candidate` means interesting but unverified; `needs-evidence` asks for a follow-up; `confirmed` means the team has reviewed enough evidence; `rejected` preserves a disproved lead.
-7. Choose **Save**. The default file is `<replay>.research.json` beside the replay.
+4. At an interesting moment, choose **+ Point** or **+ Range**. The new bookmark records the current round and selected dragon IDs, then opens an edit draft. For a range, enter its start/end rounds directly or use the current replay round for either anchor. Use **+ General** for a replay-wide note.
+5. Choose **Save annotation** to commit the draft and write the bookmark file. **Cancel** discards draft changes, so saved start/end rounds remain constant while viewing or playing the replay.
+6. Existing annotations open read-only. Choose **Edit** before changing the title, anchors, dragons, evidence, hypothesis, alternatives, confidence, or status.
+7. Selecting a range or sequence seeks to its saved start. Press Play and the viewer automatically pauses when it reaches the saved end round.
+8. `candidate` means interesting but unverified; `needs-evidence` asks for a follow-up; `confirmed` means the team has reviewed enough evidence; `rejected` preserves a disproved lead.
+9. The top-level **Save** writes any other document changes. The default file is `<replay>.research.json` beside the replay.
 
 To use a bookmark file someone sent you, open the replay, go to **Research**, and choose **Open bookmark file…**. Selecting a bookmark seeks to its start and restores its referenced dragon IDs through the original viewer. Use **Use currently selected dragons** if you want to replace a bookmark's references with the dragons you selected manually.
 

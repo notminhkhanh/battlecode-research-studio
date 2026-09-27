@@ -27,8 +27,22 @@
   let replayHash = $state("");
   let errorMessage: string | undefined = $state();
   let notice = $state("");
+  let editing = $state(false);
+  let draft: ResearchAnnotation | undefined = $state();
+  let stopAtRound: number | undefined = $state();
 
   const selected = $derived(research?.annotations.find((item) => item.id === selectedId));
+
+  $effect(() => {
+    if (!runner || !loaded || stopAtRound === undefined || !runner.playing) return;
+    if (runner.round < stopAtRound) return;
+    runner.pause();
+    runner.seek(loaded.match.positionOf(stopAtRound, 0, runner.granularity));
+  });
+
+  function cloneAnnotation(annotation: ResearchAnnotation): ResearchAnnotation {
+    return JSON.parse(JSON.stringify(annotation)) as ResearchAnnotation;
+  }
 
   function touch(annotation?: ResearchAnnotation) {
     if (!research) return;
@@ -43,6 +57,7 @@
     annotation.dragonIds = [...new Set(runner.selectedDragonIds)];
     research.annotations.push(annotation);
     selectAnnotation(annotation, false);
+    beginEdit(annotation);
     touch(annotation);
   }
 
@@ -72,13 +87,6 @@
     runner.seek(loaded.match.positionOf(round, 0, runner.granularity));
   }
 
-  function setRangeEnd() {
-    if (!selected || selected.kind !== "range" || !runner) return;
-    selected.end = { round: runner.round };
-    if (selected.start && selected.end.round < selected.start.round) [selected.start, selected.end] = [selected.end, selected.start];
-    touch(selected);
-  }
-
   function focusDragons(ids: number[] = selected?.dragonIds ?? []) {
     if (!runner) return;
     runner.selectedDragonIds = [...new Set(ids)];
@@ -86,19 +94,60 @@
 
   function clearAnnotationSelection() {
     selectedId = undefined;
+    editing = false;
+    draft = undefined;
+    stopAtRound = undefined;
     focusDragons([]);
   }
 
   function selectAnnotation(annotation: ResearchAnnotation, seek = true) {
     selectedId = annotation.id;
+    editing = false;
+    draft = undefined;
+    stopAtRound = (annotation.kind === "range" || annotation.kind === "sequence") ? annotation.end?.round : undefined;
     focusDragons(annotation.dragonIds ?? []);
     if (seek && annotation.start) jump(annotation.start.round);
   }
 
   function captureSelectedDragons() {
-    if (!selected || !runner) return;
-    selected.dragonIds = [...new Set(runner.selectedDragonIds)];
-    touch(selected);
+    if (!draft || !runner) return;
+    draft.dragonIds = [...new Set(runner.selectedDragonIds)];
+  }
+
+  function beginEdit(annotation: ResearchAnnotation | undefined = selected) {
+    if (!annotation) return;
+    draft = cloneAnnotation(annotation);
+    editing = true;
+  }
+
+  function cancelEdit() {
+    editing = false;
+    draft = undefined;
+    focusDragons(selected?.dragonIds ?? []);
+  }
+
+  function setDraftRound(which: "start" | "end", value: number) {
+    if (!draft || !loaded || !Number.isFinite(value)) return;
+    const round = Math.max(0, Math.min(Math.trunc(value), loaded.match.maxRound));
+    draft[which] = { round };
+  }
+
+  function saveAnnotation() {
+    if (!research || !selectedId || !draft) return;
+    const saved = cloneAnnotation(draft);
+    if (saved.start && saved.end && saved.end.round < saved.start.round) {
+      [saved.start, saved.end] = [saved.end, saved.start];
+    }
+    const index = research.annotations.findIndex((item) => item.id === selectedId);
+    if (index < 0) return;
+    research.annotations[index] = saved;
+    selectedId = saved.id;
+    editing = false;
+    draft = undefined;
+    touch(saved);
+    stopAtRound = (saved.kind === "range" || saved.kind === "sequence") ? saved.end?.round : undefined;
+    focusDragons(saved.dragonIds ?? []);
+    save(false);
   }
 
   async function sha256(bytes: Uint8Array): Promise<string> {
@@ -230,28 +279,71 @@
 
       <section class="annotation-detail" aria-label="Annotation details">
         {#if selected}
-          <form class="editor" onsubmit={(event) => event.preventDefault()}>
-          <div class="editor-head"><span>Edit annotation</span><button class="danger" onclick={removeSelected}>Delete</button></div>
-          <label>Title<input bind:value={selected.title} oninput={() => touch(selected)} /></label>
-          <div class="two">
-            <label>Status<select bind:value={selected.status} onchange={() => touch(selected)}><option>candidate</option><option>confirmed</option><option>needs-evidence</option><option>rejected</option></select></label>
-            <label>Confidence<input type="number" min="0" max="1" step="0.05" bind:value={selected.confidence} oninput={() => touch(selected)} /></label>
-          </div>
-          {#if selected.kind !== "general"}
-            <div class="round-row"><button onclick={() => selected.start && jump(selected.start.round)}>Start r{selected.start?.round}</button>{#if selected.kind === "range"}<button onclick={setRangeEnd}>Set end to r{runner!.round}</button>{/if}</div>
+          {#if editing && draft}
+            <form class="editor" onsubmit={(event) => event.preventDefault()}>
+              <div class="editor-head">
+                <span>Edit annotation</span>
+                <div class="editor-actions">
+                  <button onclick={cancelEdit}>Cancel</button>
+                  <button class="save-annotation" onclick={saveAnnotation}>Save annotation</button>
+                </div>
+              </div>
+              <label>Title<input bind:value={draft.title} /></label>
+              <div class="two">
+                <label>Status<select bind:value={draft.status}><option>candidate</option><option>confirmed</option><option>needs-evidence</option><option>rejected</option></select></label>
+                <label>Confidence<input type="number" min="0" max="1" step="0.05" bind:value={draft.confidence} /></label>
+              </div>
+              {#if draft.kind !== "general"}
+                <div class="anchor-editor">
+                  <label>Start round<input type="number" min="0" max={loaded!.match.maxRound} value={draft.start?.round ?? 0} oninput={(event) => setDraftRound("start", event.currentTarget.valueAsNumber)} /></label>
+                  <button onclick={() => setDraftRound("start", runner!.round)}>Use current r{runner!.round}</button>
+                  {#if draft.kind === "range" || draft.kind === "sequence"}
+                    <label>End round<input type="number" min="0" max={loaded!.match.maxRound} value={draft.end?.round ?? draft.start?.round ?? 0} oninput={(event) => setDraftRound("end", event.currentTarget.valueAsNumber)} /></label>
+                    <button onclick={() => setDraftRound("end", runner!.round)}>Use current r{runner!.round}</button>
+                  {/if}
+                </div>
+              {/if}
+              <label>Referenced dragon IDs<input value={(draft.dragonIds ?? []).join(", ")} oninput={(event) => { draft!.dragonIds = event.currentTarget.value.split(",").map((value) => Number(value.trim())).filter((value) => Number.isInteger(value) && value >= 0); focusDragons(draft!.dragonIds); }} placeholder="For example: 27, 34" /></label>
+              <div class="dragon-actions">
+                <button onclick={captureSelectedDragons}>Use currently selected dragons</button>
+                <button onclick={() => { draft!.dragonIds = []; focusDragons([]); }}>Clear viewer selection</button>
+              </div>
+              <label>Observed evidence<textarea rows="4" bind:value={draft.observation} placeholder="What is directly visible in the replay?"></textarea></label>
+              <label>Hypothesis<textarea rows="3" bind:value={draft.hypothesis} placeholder="What strategy might explain it?"></textarea></label>
+              <label>Alternatives<textarea rows="3" value={(draft.alternatives ?? []).join("\n")} oninput={(event) => { draft!.alternatives = event.currentTarget.value.split("\n").filter(Boolean); }} placeholder="One competing explanation per line"></textarea></label>
+            </form>
+          {:else}
+            <div class="annotation-view">
+              <div class="editor-head">
+                <span>Annotation</span>
+                <div class="editor-actions">
+                  <button onclick={() => beginEdit()}>Edit</button>
+                  <button class="danger" onclick={removeSelected}>Delete</button>
+                </div>
+              </div>
+              <h3>{selected.title}</h3>
+              <div class="view-meta">
+                <span>{selected.kind}</span>
+                <span>{selected.status}</span>
+                {#if selected.confidence !== undefined}<span>{Math.round(selected.confidence * 100)}% confidence</span>{/if}
+              </div>
+              {#if selected.start}
+                <div class="round-row">
+                  <button onclick={() => jump(selected.start!.round)}>Start r{selected.start.round}</button>
+                  {#if selected.end}<span>End r{selected.end.round}</span>{/if}
+                </div>
+              {/if}
+              {#if selected.dragonIds?.length}
+                <div class="read-block"><span class="read-label">Referenced dragons</span><p>{selected.dragonIds.map((id) => `#${id}`).join(", ")}</p></div>
+              {/if}
+              {#if selected.observation}<div class="read-block"><span class="read-label">Observed evidence</span><p>{selected.observation}</p></div>{/if}
+              {#if selected.hypothesis}<div class="read-block"><span class="read-label">Hypothesis</span><p>{selected.hypothesis}</p></div>{/if}
+              {#if selected.alternatives?.length}<div class="read-block"><span class="read-label">Alternatives</span><ul>{#each selected.alternatives as alternative}<li>{alternative}</li>{/each}</ul></div>{/if}
+              {#if selected.steps?.length}
+                <details><summary>Sequence evidence <span>{selected.steps.length} steps</span></summary>{#each selected.steps as step}<button class="step" onclick={() => { focusDragons(step.dragonIds ?? []); jump(step.anchor.round); }}>r{step.anchor.round}: {step.label}</button>{/each}</details>
+              {/if}
+            </div>
           {/if}
-          <label>Referenced dragon IDs<input value={(selected.dragonIds ?? []).join(", ")} oninput={(event) => { selected.dragonIds = event.currentTarget.value.split(",").map((value) => Number(value.trim())).filter((value) => Number.isInteger(value) && value >= 0); focusDragons(selected.dragonIds); touch(selected); }} placeholder="For example: 27, 34" /></label>
-          <div class="dragon-actions">
-            <button onclick={captureSelectedDragons}>Use currently selected dragons</button>
-            <button onclick={() => focusDragons([])}>Clear viewer selection</button>
-          </div>
-          <label>Observed evidence<textarea rows="4" bind:value={selected.observation} oninput={() => touch(selected)} placeholder="What is directly visible in the replay?"></textarea></label>
-          <label>Hypothesis<textarea rows="3" bind:value={selected.hypothesis} oninput={() => touch(selected)} placeholder="What strategy might explain it?"></textarea></label>
-          <label>Alternatives<textarea rows="3" value={(selected.alternatives ?? []).join("\n")} oninput={(event) => { selected.alternatives = event.currentTarget.value.split("\n").filter(Boolean); touch(selected); }} placeholder="One competing explanation per line"></textarea></label>
-          {#if selected.steps?.length}
-            <details><summary>Sequence evidence <span>{selected.steps.length} steps</span></summary>{#each selected.steps as step}<button class="step" onclick={() => { focusDragons(step.dragonIds ?? []); jump(step.anchor.round); }}>r{step.anchor.round}: {step.label}</button>{/each}</details>
-          {/if}
-          </form>
         {/if}
       </section>
     </div>
@@ -290,12 +382,24 @@
   .annotation-detail { min-height: 8rem; padding-top: 10px; border-top: 1px solid var(--vis-rule); }
   .editor { display: flex; flex-direction: column; gap: 8px; }
   .editor-head { display: flex; justify-content: space-between; align-items: center; color: var(--vis-ink); font-size: calc(var(--vis-text-body) * var(--font-scale, 1)); font-weight: 600; }
+  .editor-actions { display: flex; gap: 5px; }
+  button.save-annotation { color: var(--vis-primary); border-color: var(--vis-primary); }
   label { display: flex; flex-direction: column; gap: 3px; color: var(--vis-ink-3); font-size: var(--vis-text-label); }
   input, textarea, select { width: 100%; color: var(--vis-ink); border: 1px solid var(--vis-rule); border-radius: var(--vis-radius-field); background: var(--vis-field); padding: .35rem .45rem; font-size: calc(var(--vis-text-meta) * var(--font-scale, 1)); line-height: 1.35; resize: vertical; }
   input:focus, textarea:focus, select:focus { outline: 1px solid var(--vis-primary); }
   .two { display: grid; grid-template-columns: 1fr 90px; gap: 6px; }
-  .round-row { display: flex; gap: 5px; }
+  .anchor-editor { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 6px; }
+  .round-row { display: flex; align-items: center; gap: 7px; }
+  .round-row > span { color: var(--vis-ink-2); font-variant-numeric: tabular-nums; }
   .dragon-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+  .annotation-view { display: flex; flex-direction: column; gap: 10px; }
+  .annotation-view h3 { margin: 0; color: var(--vis-ink); font-size: calc(var(--vis-text-body) * var(--font-scale, 1)); }
+  .view-meta { display: flex; flex-wrap: wrap; gap: 5px; }
+  .view-meta span { padding: 2px 5px; color: var(--vis-ink-2); border: 1px solid var(--vis-rule); border-radius: var(--vis-radius-field); font-size: var(--vis-text-label); text-transform: capitalize; }
+  .read-block { padding-top: 8px; border-top: 1px solid var(--vis-rule-soft); }
+  .read-label { color: var(--vis-ink-3); font-size: var(--vis-text-label); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+  .read-block p, .read-block ul { margin: 4px 0 0; color: var(--vis-ink); line-height: 1.45; white-space: pre-wrap; }
+  .read-block ul { padding-left: 18px; }
   .step { display: block; width: 100%; border-width: 1px 0 0; border-radius: 0; text-align: left; font-size: 11px; background: transparent; }
   .message { margin: 30px; display: flex; flex-direction: column; gap: 8px; }
   .message.error { color: var(--vis-error); }

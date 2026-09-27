@@ -2,7 +2,7 @@
   "name": "battlecode-research-studio",
   "displayName": "Battlecode Research Studio",
   "description": "Investigate Battlecode replays with shareable annotations and communication sequence analysis.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "notminhkhanh",
   "private": true,
   "license": "MIT",
