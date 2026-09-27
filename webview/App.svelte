@@ -131,6 +131,8 @@
 
   async function open(bytes: Uint8Array, name: string, researchText?: string) {
     try {
+      notice = "";
+      mapPick = false;
       loaded = buildReplay(bytes);
       runner = new GameRunner(loaded.match);
       fileName = name;

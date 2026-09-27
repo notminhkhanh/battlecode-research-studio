@@ -69,4 +69,8 @@ pnpm build
 pnpm package
 ```
 
+For a browser-based UI smoke harness, run `pnpm dev:webview` and open
+`http://127.0.0.1:5173/tests/ui-harness.html`. It mocks the VS Code message
+bridge and loads the checked-in `M228828` replay and sidecar.
+
 The studio is MIT licensed. The vendored organiser repository remains under its own MIT license; see [third-party notices](THIRD_PARTY_NOTICES.md).

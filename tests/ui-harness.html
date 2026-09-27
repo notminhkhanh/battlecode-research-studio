@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Battlecode Research Studio UI Harness</title>
+    <link rel="icon" href="data:," />
+    <script>
+      window.__studioMessages = [];
+      window.acquireVsCodeApi = () => ({
+        getState: () => undefined,
+        setState: () => undefined,
+        postMessage: async (message) => {
+          window.__studioMessages.push(message);
+          if (message.type === "ready") {
+            const [replay, research] = await Promise.all([
+              fetch("/examples/M228828/M228828.replay").then((response) => response.arrayBuffer()),
+              fetch("/examples/M228828/M228828.replay.research.json").then((response) => response.text()),
+            ]);
+            window.postMessage(
+              { type: "open", name: "M228828.replay", replayBytes: new Uint8Array(replay), researchText: research },
+              "*",
+            );
+          } else if (message.type === "save" || message.type === "saveAs") {
+            window.postMessage({ type: "saved", path: "/tmp/M228828.replay.research.json" }, "*");
+          }
+        },
+      });
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/webview/main.ts"></script>
+  </body>
+</html>
